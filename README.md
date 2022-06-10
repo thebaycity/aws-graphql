@@ -10,6 +10,8 @@ GraphQL server based on AWS Lambda, AWS APIGateway, APIGatewayWebsocket
 
 Deployment Infrastructure use Terraform 
 
+* install terraform at https://learn.hashicorp.com/tutorials/terraform/install-cli
 ```
+terraform init
 ./deploy.sh
 ```

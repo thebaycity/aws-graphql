@@ -20,10 +20,9 @@ func Subscription() *graphql.Object {
 					c := make(chan interface{})
 					go func() {
 						var i int
-
 						for {
 							i++
-							feed := Message{ID: fmt.Sprintf("%d", i)}
+							feed := &Message{ID: fmt.Sprintf("%d", i)}
 							select {
 							case <-p.Context.Done():
 								log.Println("[RootSubscription] [Subscribe] ps canceled")
@@ -33,14 +32,12 @@ func Subscription() *graphql.Object {
 								c <- feed
 							}
 							time.Sleep(250 * time.Millisecond)
-
 							if i == 21 {
 								close(c)
 								return
 							}
 						}
 					}()
-
 					return c, nil
 				},
 			},

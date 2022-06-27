@@ -8,14 +8,21 @@ import (
 	"github.com/aws/aws-sdk-go/service/apigatewaymanagementapi"
 )
 
+var (
+	sess *session.Session
+)
+
 type PubSub struct {
 	api *apigatewaymanagementapi.ApiGatewayManagementApi
 }
 
-func NewPubSub(awsWebsocketEndpoint, region string) *PubSub {
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
+func init() {
+	sess = session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
+}
+
+func NewPubSub(awsWebsocketEndpoint, region string) *PubSub {
 	return &PubSub{api: apigatewaymanagementapi.New(sess, &aws.Config{
 		Credentials: sess.Config.Credentials,
 		Region:      aws.String(region),
@@ -25,7 +32,15 @@ func NewPubSub(awsWebsocketEndpoint, region string) *PubSub {
 
 func (p *PubSub) PostToConnection(connectionId string, data interface{}) error {
 	if data != nil {
-		b, _ := json.Marshal(data)
+		b, err := json.Marshal(data)
+		if err != nil {
+			p.PostToConnection(connectionId, map[string]interface{}{
+				"type": "error",
+				"payload": map[string]interface{}{
+					"errors": []string{fmt.Sprintf("encode json error: %s", err.Error())},
+				},
+			})
+		}
 		output, err := p.api.PostToConnection(&apigatewaymanagementapi.PostToConnectionInput{
 			ConnectionId: aws.String(connectionId),
 			Data:         b,

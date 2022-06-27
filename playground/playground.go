@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-//go:embed template.go.html
+//go:embed template.gohtml
 var tpl string
 var page = template.Must(template.New("graphiql").Parse(tpl))
 
